@@ -10,6 +10,7 @@ import argparse
 import json
 from pathlib import Path
 from sklearn.model_selection import KFold
+import shutil
 
 def create_splits(dataset, n_splits=3):
     '''Creates n_splits train-val splits for the given dataset. Please 
@@ -104,17 +105,19 @@ def main():
         for image in images_tr:
             new_fname = fname_mapping['images_tr'][image.name]
             image_path_target = output_data_path / 'imagesTr' / new_fname
-            image_path_target.symlink_to(image)
-            # also symlink the corresponding label
+            shutil.copy(image, image_path_target)
+            # also copy the corresponding label
             label_fname = image.name.replace('_0000.png', '.png')
             label = image.parent.parent / 'labelsTr' / label_fname
             new_label_fname = new_fname.replace('_0000.png', '.png')
             label_path_target = output_data_path / 'labelsTr' / new_label_fname
-            label_path_target.symlink_to(label)
+            print(image, label)
+            print(image_path_target, label_path_target)
+            shutil.copy(label, label_path_target)
         for image in images_ts:
             new_fname = fname_mapping['images_ts'][image.name]
             image_path = output_data_path / 'imagesTs' / new_fname
-            image_path.symlink_to(image)
+            shutil.copy(image, image_path)
     # create dataset.json file
     dataset_json = {
         'name': 'Dataset444_AGG',
