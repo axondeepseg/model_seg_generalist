@@ -9,6 +9,18 @@ Author: Armand Collin
 import argparse
 import json
 from pathlib import Path
+from sklearn.model_selection import KFold
+
+def create_splits(dataset, n_splits=3):
+    '''Creates n_splits train-val splits for the given dataset. Please 
+    note that the splits might not have exactly the same length.'''
+    kf = KFold(n_splits=n_splits)
+    splits = []
+    for train_index, val_index in kf.split(dataset):
+        train = [dataset[i] for i in train_index]
+        val = [dataset[i] for i in val_index]
+        splits.append((train, val))
+    return splits
 
 def map_images(datasets, image_type, current_index):
     fname_mapping = []
@@ -57,6 +69,14 @@ def main():
     with open(output_dir / 'fname_mapping.json', 'w') as f:
         json.dump(fname_mapping, f)
 
+    # create the 3-fold train-val splits for every dataset:
+    train_val_splits = {str(dataset): [] for dataset in datasets}
+    for dataset_name in datasets:
+        dataset = str(dataset_name)
+        images_tr = data_dict[dataset]['imagesTr']
+        images_tr = [str(i.name) for i in images_tr]
+        train_val_splits[dataset] = create_splits(images_tr, n_splits=3)
+    
 
 
 if __name__ == "__main__":
