@@ -6,11 +6,9 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-config="2d"
-
 RESULTS_DIR=$(realpath $1)
-dataset_id=${3:-444}
-dataset_name=${4:-"AGG"}
+dataset_id=${2:-444}
+dataset_name=${3:-"AGG"}
 
 echo "-------------------------------------------------------"
 echo "Converting dataset to nnUNetv2 format"
@@ -25,4 +23,4 @@ echo "-------------------------------------------------------"
 echo "Running preprocessing and verifying dataset integrity"
 echo "-------------------------------------------------------"
 
-nnUNetv2_plan_and_preprocess -d ${dataset_id} --verify_dataset_integrity -c ${config}
+nnUNetv2_plan_and_preprocess -d ${dataset_id} --verify_dataset_integrity -c "2d"
