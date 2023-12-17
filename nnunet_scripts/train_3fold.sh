@@ -7,6 +7,11 @@ dataset_id=444
 dataset_name=Dataset444_AGG
 nnunet_trainer="nnUNetTrainer"
 
+# Set up the necessary environment variables
+export nnUNet_raw="`pwd`/nnUNet_raw"
+export nnUNet_preprocessed="`pwd`/nnUNet_preprocessed"
+export nnUNet_results="`pwd`/nnUNet_results"
+
 # Select number of folds here
 folds=(0 1 2)
 

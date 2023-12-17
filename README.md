@@ -18,6 +18,6 @@ This will create a new nnunet dataset. We can then run the initial setup,
 move the manual split in the preprocessed folder and start training:
 ```
 ./nnunet_scripts/setup_nnunet.sh ABSOLUTE_PATH_TO_CWD
-mv final_splits.json nnUNet_preprocessed/Dataset444_AGG
+cp final_splits.json nnUNet_preprocessed/Dataset444_AGG/
 ./nnunet_scripts/train_3fold.sh
 ```
