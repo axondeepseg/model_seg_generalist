@@ -10,6 +10,17 @@ import argparse
 import json
 from pathlib import Path
 
+def map_images(datasets, image_type, current_index):
+    fname_mapping = []
+    for dataset in datasets:
+        images = [im for im in (dataset / image_type).glob('*.png')]
+        for image in images:
+            new_fname = f'AGG_{current_index:03d}_0000.png'
+            old_fname = str(image.name)
+            fname_mapping.append([old_fname, new_fname])
+            current_index += 1
+    return fname_mapping, current_index
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", help="Where the datasets are located")
@@ -32,23 +43,16 @@ def main():
             'numTest': len(images_ts)
         }
 
-    fname_mapping = {'images_tr': [], 'images_ts': []}
     new_index = 0
-    # rename every file and log mapping
-    for dataset in data_dict.keys():
-        for im_tr in data_dict[dataset]['imagesTr']:
-            new_fname = f'AGG_{new_index:03d}_0000.png'
-            old_fname = str(im_tr.name)
-            fname_mapping['images_tr'].append([old_fname, new_fname])
-            new_index += 1
-    fname_mapping['numTraining'] = len(fname_mapping['images_tr'])
-    for dataset in data_dict.keys():
-        for im_ts in data_dict[dataset]['imagesTs']:
-            new_fname = f'AGG_{new_index:03d}_0000.png'
-            old_fname = str(im_ts.name)
-            fname_mapping['images_ts'].append([old_fname, new_fname])
-            new_index += 1
-    fname_mapping['numTest'] = len(fname_mapping['images_ts'])
+    fname_mapping_tr, new_index = map_images(datasets, 'imagesTr', new_index)
+    fname_mapping_ts, new_index = map_images(datasets, 'imagesTs', new_index)
+    fname_mapping = {
+        'images_tr': fname_mapping_tr,
+        'images_ts': fname_mapping_ts,
+        'numTraining': len(fname_mapping_tr),
+        'numTest': len(fname_mapping_ts)
+    }
+
     # save mapping
     with open(output_dir / 'fname_mapping.json', 'w') as f:
         json.dump(fname_mapping, f)
