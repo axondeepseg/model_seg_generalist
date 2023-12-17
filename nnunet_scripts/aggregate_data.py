@@ -91,6 +91,49 @@ def main():
     with open(output_dir / 'final_splits.json', 'w') as f:
         json.dump(target_splits, f)
 
+    # finally, copy files into the new aggregated dataset
+    output_data_path = output_dir / 'nnUNet_raw' / 'Dataset444_AGG'
+    output_data_path.mkdir(exist_ok=False)
+    (output_data_path / 'imagesTr').mkdir(exist_ok=False)
+    (output_data_path / 'labelsTr').mkdir(exist_ok=False)
+    (output_data_path / 'imagesTs').mkdir(exist_ok=False)
+    for dataset in datasets:
+        dataset_name = str(dataset)
+        images_tr = data_dict[dataset_name]['imagesTr']
+        images_ts = data_dict[dataset_name]['imagesTs']
+        for image in images_tr:
+            new_fname = fname_mapping['images_tr'][image.name]
+            image_path_target = output_data_path / 'imagesTr' / new_fname
+            image_path_target.symlink_to(image)
+            # also symlink the corresponding label
+            label_fname = image.name.replace('_0000.png', '.png')
+            label = image.parent.parent / 'labelsTr' / label_fname
+            new_label_fname = new_fname.replace('_0000.png', '.png')
+            label_path_target = output_data_path / 'labelsTr' / new_label_fname
+            label_path_target.symlink_to(label)
+        for image in images_ts:
+            new_fname = fname_mapping['images_ts'][image.name]
+            image_path = output_data_path / 'imagesTs' / new_fname
+            image_path.symlink_to(image)
+    # create dataset.json file
+    dataset_json = {
+        'name': 'Dataset444_AGG',
+        'description': 'Aggregated dataset from all source domains',
+        "labels": {
+            "background": 0,
+            "myelin": 1,
+            "axon": 2
+        },
+        "channel_names": {
+            "0": "rescale_to_0_1"
+        },
+        "numTraining": fname_mapping['numTraining'],
+        "numTest": fname_mapping['numTest'],
+        "file_ending": ".png"
+    }
+    with open(output_data_path / 'dataset.json', 'w') as f:
+        json.dump(dataset_json, f)
+
 
 if __name__ == "__main__":
     main()
