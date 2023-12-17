@@ -1,3 +1,11 @@
+"""
+This script aggregates data by processing images from all datasets and 
+copying them into a new single nnunet formatted dataset. It also creates a 
+3-fold cross-validation scheme manually to ensure the splits contain data from 
+all domains.
+Author: Armand Collin
+"""
+
 import argparse
 import json
 from pathlib import Path
