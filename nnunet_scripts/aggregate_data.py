@@ -111,8 +111,6 @@ def main():
             label = image.parent.parent / 'labelsTr' / label_fname
             new_label_fname = new_fname.replace('_0000.png', '.png')
             label_path_target = output_data_path / 'labelsTr' / new_label_fname
-            print(image, label)
-            print(image_path_target, label_path_target)
             shutil.copy(label, label_path_target)
         for image in images_ts:
             new_fname = fname_mapping['images_ts'][image.name]
