@@ -23,13 +23,13 @@ def create_splits(dataset, n_splits=3):
     return splits
 
 def map_images(datasets, image_type, current_index):
-    fname_mapping = []
+    fname_mapping = {}
     for dataset in datasets:
         images = [im for im in (dataset / image_type).glob('*.png')]
         for image in images:
             new_fname = f'AGG_{current_index:03d}_0000.png'
             old_fname = str(image.name)
-            fname_mapping.append([old_fname, new_fname])
+            fname_mapping[old_fname] = new_fname
             current_index += 1
     return fname_mapping, current_index
 
@@ -76,7 +76,20 @@ def main():
         images_tr = data_dict[dataset]['imagesTr']
         images_tr = [str(i.name) for i in images_tr]
         train_val_splits[dataset] = create_splits(images_tr, n_splits=3)
-    
+
+    # convert splits from source domains to target domain
+    target_splits = [{'train': [], 'val': []} for i in range(3)]
+    for fold in range(3):
+        for dataset in datasets:
+            current_split = train_val_splits[str(dataset)][fold]
+            train, val = current_split
+            target_train = [fname_mapping['images_tr'][im].replace('_0000.png', '') for im in train]
+            target_val = [fname_mapping['images_tr'][im].replace('_0000.png', '') for im in val]
+            target_splits[fold]['train'].extend(target_train)
+            target_splits[fold]['val'].extend(target_val)
+    # save splits
+    with open(output_dir / 'final_splits.json', 'w') as f:
+        json.dump(target_splits, f)
 
 
 if __name__ == "__main__":
