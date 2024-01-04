@@ -6,6 +6,7 @@ Author: Armand Collin
 """
 
 import argparse
+import json
 from pathlib import Path
 from monai.metrics import DiceMetric, MeanIoU
 
@@ -32,7 +33,9 @@ def main():
 
     pred_path = Path(args.pred_path)
     gt_path = Path(args.gt_path)
-    # there might be more test imgs than GTs
+    mapping = json.load(open(args.mapping_path))
+    reverted_mapping = {v: k for k, v in mapping['images_ts'].items()}
+    # there might be more test imgs than GTs; evaluation on labelled data only
     gts = [f for f in gt_path.glob('*.png')]
     metrics = [DiceMetric(), MeanIoU()]
 
@@ -42,9 +45,13 @@ def main():
         pred = pred_path / gt.name
         print(pred)
         # compute the metrics
-        # for metric in metrics:
-        #     value = compute_metrics(pred, gt, metric)
-        #     print(f'{metric.__class__.__name__} for {gt.name}: {value}')
+        for metric in metrics:
+            #TODO: pred and gt should be imgs, not paths
+            value = compute_metrics(pred, gt, metric)
+            original_fname = reverted_mapping[gt.name]
+            metric = metric.__class__.__name__
+            print(f'{metric} for {gt.name} (aka {original_fname}): {value}')
+
 
 
 if __name__ == '__main__':
