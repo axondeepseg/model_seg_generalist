@@ -7,6 +7,9 @@ Author: Armand Collin
 
 import argparse
 import json
+import cv2
+import numpy as np
+import torch 
 from pathlib import Path
 from monai.metrics import DiceMetric, MeanIoU
 
@@ -25,9 +28,9 @@ def compute_metrics(pred, gt, metric):
 
 def main():
     parser = argparse.ArgumentParser(description='Run evaluation on a generalist model')
-    parser.add_argument('-p', '--pred_path', type=str, help='Path to the predictions folder')
+    parser.add_argument('-p', '--pred_path', type=str, help='Path to the predictions folder (axonmyelin preds)')
     parser.add_argument('-m', '--mapping_path', type=str, help='Path to the filename mapping JSON file')
-    parser.add_argument('-g', '--gt_path', type=str, help='Path to the GT folder')
+    parser.add_argument('-g', '--gt_path', type=str, help='Path to the GT folder (axonmyelin masks)')
     parser.add_argument('-o', '--output_path', type=str, help='Path to save the evaluation results')
     args = parser.parse_args()
 
@@ -43,12 +46,19 @@ def main():
     for gt in gts:
         # get the corresponding prediction
         pred = pred_path / gt.name
-        print(pred)
+        pred_im = cv2.imread(str(pred), cv2.IMREAD_GRAYSCALE)[None]
+        pred_im = torch.from_numpy(pred_im).float()
+        gt_im = cv2.imread(str(gt), cv2.IMREAD_GRAYSCALE)[None]
+        gt_im = torch.from_numpy(gt_im).float()
+
+        print(f'pred range: {np.unique(pred_im)}')
+        print(f'gt range: {np.unique(gt_im)}')
         # compute the metrics
         for metric in metrics:
-            #TODO: pred and gt should be imgs, not paths
-            value = compute_metrics(pred, gt, metric)
-            original_fname = reverted_mapping[gt.name]
+            value = compute_metrics([pred_im], [gt_im], metric)
+            # modify gt name to add _0000 suffix before file extension
+            gt_name = gt.name.split('.')[0] + '_0000.' + gt.name.split('.')[1]
+            original_fname = reverted_mapping[gt_name]
             metric = metric.__class__.__name__
             print(f'{metric} for {gt.name} (aka {original_fname}): {value}')
 
