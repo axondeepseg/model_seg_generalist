@@ -1,12 +1,13 @@
 """
 This script is used to run evaluation on a generalist model trained in the 
 nnUNet framework. It will compute the metrics for every test image and display 
-results for every dataset separately.
+results for every dataset separately, for both axon and myelin.
 Author: Armand Collin
 """
 
 import argparse
 import json
+import warnings
 import cv2
 import numpy as np
 import torch 
@@ -25,6 +26,19 @@ def compute_metrics(pred, gt, metric):
     """
     value = metric(pred, gt)
     return value
+
+def extract_binary_masks(mask):
+    '''
+    This function will take as input an 8-bit image containing both the axon 
+    class (value should be ~255) and the myelin class (value should be ~127).
+    '''
+    # warn if img contains more than 3 uniques values
+    if len(np.unique(mask)) > 3:
+        warnings.warn('WARNING: more than 3 unique values in the mask')
+    myelin_mask = np.where(mask > 100 and mask < 200, 1, 0)
+    axon_mask = np.where(mask > 200, 1, 0)
+    return axon_mask, myelin_mask
+    
 
 def main():
     parser = argparse.ArgumentParser(description='Run evaluation on a generalist model')
@@ -59,9 +73,8 @@ def main():
             # modify gt name to add _0000 suffix before file extension
             gt_name = gt.name.split('.')[0] + '_0000.' + gt.name.split('.')[1]
             original_fname = reverted_mapping[gt_name]
-            metric = metric.__class__.__name__
-            print(f'{metric} for {gt.name} (aka {original_fname}): {value}')
-
+            metric_name = metric.__class__.__name__
+            print(f'{metric_name} for {gt.name} (aka {original_fname}): {value}')
 
 
 if __name__ == '__main__':
