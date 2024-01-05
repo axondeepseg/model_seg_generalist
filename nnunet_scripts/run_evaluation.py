@@ -96,11 +96,13 @@ def main():
             for metric in metrics:
                 value = compute_metrics([pred_mask], [gt_mask], metric)
                 row[metric.__class__.__name__] = value
+                print_metric(value, gt, metric, label, reverted_mapping)
             df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
 
     # Export the DataFrame to a CSV file
     output_fname = args.output_fname + '.csv'
     df.to_csv(output_fname, index=False)
+    print(f'Evaluation results saved to {output_fname}.')
 
 if __name__ == '__main__':
     main()
