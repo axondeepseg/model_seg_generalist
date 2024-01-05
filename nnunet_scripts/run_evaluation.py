@@ -64,7 +64,14 @@ def main():
     reverted_mapping = {v: k for k, v in mapping['images_ts'].items()}
     # there might be more test imgs than GTs; evaluation on labelled data only
     gts = [f for f in gt_path.glob('*.png')]
+
+    # Define the metrics and instantiate output DataFrame
     metrics = [DiceMetric(), MeanIoU()]
+    # Get the metric names
+    metric_names = [metric.__class__.__name__ for metric in metrics]
+    # Create an empty DataFrame
+    columns = ['gt_filename', 'pred_filename', 'label'] + metric_names
+    df = pd.DataFrame(columns=columns)
 
     # iterate over the ground truths
     for gt in gts:
@@ -75,15 +82,25 @@ def main():
         gt_im = cv2.imread(str(gt), cv2.IMREAD_GRAYSCALE)[None]
         gt_ax, gt_my = extract_binary_masks(gt_im)
 
+        classwise_pairs = [
+            ('axon', pred_ax, gt_ax), 
+            ('myelin', pred_my, gt_my)
+        ]
         # compute the metrics
-        for metric in metrics:
-            # Compute metrics for axon
-            value_ax = compute_metrics([pred_ax], [gt_ax], metric)
-            print_metric(value_ax, gt, metric, 'axon', reverted_mapping)
+        for label, pred_mask, gt_mask in classwise_pairs:
+            row = {
+                'gt_filename': gt.name, 
+                'pred_filename': pred.name, 
+                'label': label
+            }
+            for metric in metrics:
+                value = compute_metrics([pred_mask], [gt_mask], metric)
+                row[metric.__class__.__name__] = value
+            df = df.append(row, ignore_index=True)
 
-            # Compute metrics for myelin
-            value_my = compute_metrics([pred_my], [gt_my], metric)
-            print_metric(value_my, gt, metric, 'myelin', reverted_mapping)
+    # Export the DataFrame to a CSV file
+    output_path = Path(args.output_path) / 'metrics.csv'
+    df.to_csv(str(output_path), index=False)
 
 if __name__ == '__main__':
     main()
