@@ -55,7 +55,7 @@ def main():
     parser.add_argument('-p', '--pred_path', type=str, help='Path to the predictions folder (axonmyelin preds)')
     parser.add_argument('-m', '--mapping_path', type=str, help='Path to the filename mapping JSON file')
     parser.add_argument('-g', '--gt_path', type=str, help='Path to the GT folder (axonmyelin masks)')
-    parser.add_argument('-o', '--output_path', type=str, help='Path to save the evaluation results')
+    parser.add_argument('-o', '--output_fname', type=str, help='Filename for evaluation results')
     args = parser.parse_args()
 
     pred_path = Path(args.pred_path)
@@ -99,8 +99,8 @@ def main():
             df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
 
     # Export the DataFrame to a CSV file
-    output_path = Path(args.output_path) / 'metrics.csv'
-    df.to_csv(str(output_path), index=False)
+    output_fname = args.output_fname + '.csv'
+    df.to_csv(output_fname, index=False)
 
 if __name__ == '__main__':
     main()
