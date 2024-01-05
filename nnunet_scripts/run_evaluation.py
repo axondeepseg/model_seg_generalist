@@ -10,7 +10,8 @@ import json
 import warnings
 import cv2
 import numpy as np
-import torch 
+import torch
+import pandas as pd
 from pathlib import Path
 from monai.metrics import DiceMetric, MeanIoU
 
@@ -25,20 +26,29 @@ def compute_metrics(pred, gt, metric):
         the computed metric
     """
     value = metric(pred, gt)
-    return value
+    return value.item()
 
 def extract_binary_masks(mask):
     '''
     This function will take as input an 8-bit image containing both the axon 
     class (value should be ~255) and the myelin class (value should be ~127).
+    This function will also convert the numpy arrays read by opencv to Tensors.
     '''
-    # warn if img contains more than 3 uniques values
+    # axonmyelin masks should always have 3 unique values
     if len(np.unique(mask)) > 3:
         warnings.warn('WARNING: more than 3 unique values in the mask')
-    myelin_mask = np.where(mask > 100 and mask < 200, 1, 0)
+    myelin_mask = np.where(np.logical_and(mask > 100, mask < 200), 1, 0)
+    myelin_mask = torch.from_numpy(myelin_mask).float()
     axon_mask = np.where(mask > 200, 1, 0)
+    axon_mask = torch.from_numpy(axon_mask).float()
     return axon_mask, myelin_mask
     
+def print_metric(value, gt, metric, label, reverted_mapping):
+    # modify gt name to add _0000 suffix before file extension
+    gt_name = gt.name.split('.')[0] + '_0000.' + gt.name.split('.')[1]
+    original_fname = reverted_mapping[gt_name]
+    metric_name = metric.__class__.__name__
+    print(f'{metric_name} for {label} in {gt.name} (aka {original_fname}): {value}')
 
 def main():
     parser = argparse.ArgumentParser(description='Run evaluation on a generalist model')
@@ -61,21 +71,19 @@ def main():
         # get the corresponding prediction
         pred = pred_path / gt.name
         pred_im = cv2.imread(str(pred), cv2.IMREAD_GRAYSCALE)[None]
-        pred_im = torch.from_numpy(pred_im).float()
+        pred_ax, pred_my = extract_binary_masks(pred_im)
         gt_im = cv2.imread(str(gt), cv2.IMREAD_GRAYSCALE)[None]
-        gt_im = torch.from_numpy(gt_im).float()
+        gt_ax, gt_my = extract_binary_masks(gt_im)
 
-        print(f'pred range: {np.unique(pred_im)}')
-        print(f'gt range: {np.unique(gt_im)}')
         # compute the metrics
         for metric in metrics:
-            value = compute_metrics([pred_im], [gt_im], metric)
-            # modify gt name to add _0000 suffix before file extension
-            gt_name = gt.name.split('.')[0] + '_0000.' + gt.name.split('.')[1]
-            original_fname = reverted_mapping[gt_name]
-            metric_name = metric.__class__.__name__
-            print(f'{metric_name} for {gt.name} (aka {original_fname}): {value}')
+            # Compute metrics for axon
+            value_ax = compute_metrics([pred_ax], [gt_ax], metric)
+            print_metric(value_ax, gt, metric, 'axon', reverted_mapping)
 
+            # Compute metrics for myelin
+            value_my = compute_metrics([pred_my], [gt_my], metric)
+            print_metric(value_my, gt, metric, 'myelin', reverted_mapping)
 
 if __name__ == '__main__':
     main()
