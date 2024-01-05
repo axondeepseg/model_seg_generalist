@@ -96,7 +96,7 @@ def main():
             for metric in metrics:
                 value = compute_metrics([pred_mask], [gt_mask], metric)
                 row[metric.__class__.__name__] = value
-            df = df.append(row, ignore_index=True)
+            df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
 
     # Export the DataFrame to a CSV file
     output_path = Path(args.output_path) / 'metrics.csv'
