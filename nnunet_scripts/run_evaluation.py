@@ -74,7 +74,7 @@ def main():
     # Get the metric names
     metric_names = [metric.__class__.__name__ for metric in metrics]
     # Create an empty DataFrame
-    columns = ['gt_filename', 'pred_filename', 'label'] + metric_names
+    columns = ['original_fname', 'pred_fname', 'label'] + metric_names
     df = pd.DataFrame(columns=columns)
 
     # iterate over the ground truths
