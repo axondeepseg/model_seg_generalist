@@ -43,10 +43,14 @@ def extract_binary_masks(mask):
     axon_mask = torch.from_numpy(axon_mask).float()
     return axon_mask, myelin_mask
     
+def get_original_filename(gt, reverted_mapping):
+    gt_name = gt.name.split('.')[0] + '_0000.' + gt.name.split('.')[1]
+    return reverted_mapping[gt_name]
+
 def print_metric(value, gt, metric, label, reverted_mapping):
     # modify gt name to add _0000 suffix before file extension
     gt_name = gt.name.split('.')[0] + '_0000.' + gt.name.split('.')[1]
-    original_fname = reverted_mapping[gt_name]
+    original_fname = get_original_filename(gt, reverted_mapping)
     metric_name = metric.__class__.__name__
     print(f'{metric_name} for {label} in {gt.name} (aka {original_fname}): {value}')
 
@@ -89,8 +93,8 @@ def main():
         # compute the metrics
         for label, pred_mask, gt_mask in classwise_pairs:
             row = {
-                'gt_filename': gt.name, 
-                'pred_filename': pred.name, 
+                'original_fname': get_original_filename(gt, reverted_mapping), 
+                'pred_fname': pred.name, 
                 'label': label
             }
             for metric in metrics:
