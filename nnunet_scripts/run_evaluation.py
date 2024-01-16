@@ -60,6 +60,7 @@ def main():
     parser.add_argument('-m', '--mapping_path', type=str, help='Path to the filename mapping JSON file')
     parser.add_argument('-g', '--gt_path', type=str, help='Path to the GT folder (axonmyelin masks)')
     parser.add_argument('-o', '--output_fname', type=str, help='Filename for evaluation results')
+    parser.add_argument('-s', '--pred_suffix', type=str, default="", help='Suffix in the prediction files (e.g. _0000)')
     args = parser.parse_args()
 
     pred_path = Path(args.pred_path)
@@ -80,10 +81,13 @@ def main():
     # iterate over the ground truths
     for gt in gts:
         # get the corresponding prediction
-        pred = pred_path / gt.name
+        pred = pred_path / (gt.name.split(".")[0] + args.pred_suffix + ".png")
         pred_im = cv2.imread(str(pred), cv2.IMREAD_GRAYSCALE)[None]
+        pred_im = np.floor(pred_im / np.max(pred_im) * 255).astype(np.uint8)
         pred_ax, pred_my = extract_binary_masks(pred_im)
+        
         gt_im = cv2.imread(str(gt), cv2.IMREAD_GRAYSCALE)[None]
+        gt_im = np.floor(gt_im / np.max(gt_im) * 255).astype(np.uint8)
         gt_ax, gt_my = extract_binary_masks(gt_im)
 
         classwise_pairs = [
