@@ -3,3 +3,4 @@ final_splits.json
 nnUNet_raw
 nnUNet_preprocessed
 nnUNet_results
+.vscode/
