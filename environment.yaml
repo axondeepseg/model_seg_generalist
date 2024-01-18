@@ -1,0 +1,8 @@
+name: generalist_seg
+channels:
+  - defaults
+dependencies:
+  - pip:
+      - opencv-python==4.8.1.78
+      - nnunetv2==2.2.1
+      - monai
