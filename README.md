@@ -1,7 +1,9 @@
 # model_seg_generalist
 
 ## How to train
-This model is trained on 5 datasets. The preprocessing script expects the following 5 datasets, already in nnunet format:
+This model can be trained on multiple datasets. The preprocessing script expects the datasets, already in nnunet format, to be located in a specific directory (the directory containing `nnUNet_raw`, `nnUNet_preprocessed`, `nnUNet_results`). The indices of the datasets to be used for training must be passed as arguments to the script.
+
+The datasets could be any of the following:
 
 - TEM dataset
 - SEM dataset
@@ -9,10 +11,19 @@ This model is trained on 5 datasets. The preprocessing script expects the follow
 - BF dataset (wakehealth, human)
 - BF dataset (VCU, rabbit)
 
-First, run the aggregation script:
+First, run the aggregation script with the required arguments. The script expects the following arguments:
+
+- `--nnunet_dir`: The path to the directory containing the datasets.
+- `--dataset_ids`: A list of indices of the datasets to be used for training. If no indices are provided, all datasets in the directory will be used.
+- `--name`: (Optional) The name you want to assign to the aggregated dataset. Defaults to 'Dataset444_AGG'.
+- `--description`: (Optional) A description for the aggregated dataset. Defaults to 'Aggregated dataset from all source domains'.
+- `--k`: (Optional) The number of folds for cross-validation. Defaults to 5.
+
+Here is an example command to run the script:
 ```
-python nnunet_scripts/aggregate_data.py -i path_to_directory_containing_dsets -o .
+python nnunet_scripts/aggregate_data.py --nnunet_dir path_to_directory_containing_dsets --dataset_ids <dataset_index_1> <dataset_index_2> ... <dataset_index_n> --name MyAggregatedDataset --description "Aggregated dataset for my experiment" --k 5
 ```
+Replace `<dataset_index_1> <dataset_index_2> ... <dataset_index_n>` with the indices of the datasets you want to use for training.
 
 This will create a new nnunet dataset. We can then run the initial setup, 
 move the manual split in the preprocessed folder and start training:
