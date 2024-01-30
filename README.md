@@ -27,10 +27,9 @@ Replace `<dataset_index_1> <dataset_index_2> ... <dataset_index_n>` with the ind
 
 This will create a new nnunet dataset. We can then run the initial setup, 
 move the manual split in the preprocessed folder and start training:
-```
-./nnunet_scripts/setup_nnunet.sh ABSOLUTE_PATH_TO_CWD
-cp final_splits.json nnUNet_preprocessed/Dataset444_AGG/
-./nnunet_scripts/train_3fold.sh
+```bash
+source ./nnunet_scripts/setup_nnunet.sh NNUNET_DIR
+./nnunet_scripts/train_nnunet.sh 444 AGG <GPU_ID> <FOLD_1> <FOLD_2> ... <FOLD_k>
 ```
 
 ## Setting Up Conda Environment
