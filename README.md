@@ -31,6 +31,16 @@ move the manual split in the preprocessed folder and start training:
 source ./nnunet_scripts/setup_nnunet.sh NNUNET_DIR
 ./nnunet_scripts/train_nnunet.sh 444 AGG <GPU_ID> <FOLD_1> <FOLD_2> ... <FOLD_k>
 ```
+To parallelize the execution of the training script for faster processing, you can run multiple instances of the script simultaneously, each handling a different fold for cross-validation. This is particularly useful when you have access to a machine with multiple GPUs. Here's an example command that demonstrates how to run training on 5 folds in parallel:
+
+```bash
+./nnunet_scripts/train_nnunet.sh 444 AGG <GPU_ID> 0 &
+./nnunet_scripts/train_nnunet.sh 444 AGG <GPU_ID> 1 & 
+./nnunet_scripts/train_nnunet.sh 444 AGG <GPU_ID> 2 & 
+./nnunet_scripts/train_nnunet.sh 444 AGG <GPU_ID> 3 & 
+./nnunet_scripts/train_nnunet.sh 444 AGG <GPU_ID> 4 & 
+```
+
 
 ## Setting Up Conda Environment
 
@@ -80,4 +90,9 @@ For instance, to run the script with specific datasets, use the command below:
 source ./nnunet_scripts/inference_and_evaluation.sh ${RESULTS_DIR}/nnUNet_results Dataset002_SEM Dataset003_TEM Dataset004_BF_RAT Dataset005_wakehealth Dataset006_BF_VCU Dataset444_AGG
 ```
 
+
+## Authors
+
+- Armand Collin
+- Arthur Boschet
 
