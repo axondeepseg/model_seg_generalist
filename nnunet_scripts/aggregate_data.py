@@ -79,7 +79,10 @@ def create_splits(dataset: List[str], n_splits: int = 5):
 
 
 def map_images(
-    datasets: List[str], image_type: Literal["imagesTr", "imagesTs"], current_index: int
+    datasets: List[str],
+    image_type: Literal["imagesTr", "imagesTs"],
+    current_index: int,
+    acronym: str = "AGG",
 ):
     """
     Creates a mapping between the original filenames and the new filenames
@@ -92,12 +95,14 @@ def map_images(
         Type of images to aggregate. Either training or test images.
     current_index : int
         Current index of the image to aggregate.
+    acronym : str, optional
+        Acronym of the aggregated dataset which is added in front of the image names, by default "AGG".
     """
     fname_mapping = {}
     for dataset in datasets:
         images = [im for im in (dataset / image_type).glob("*.png")]
         for image in images:
-            new_fname = f"AGG_{current_index:03d}_0000.png"
+            new_fname = f"{acronym}_{current_index:03d}_0000.png"
             old_fname = str(image.name)
             fname_mapping[old_fname] = new_fname
             current_index += 1
@@ -147,9 +152,14 @@ def main():
         }
 
     # Create a mapping between the original filenames and the new filenames
+    dataset_acronym = args.name[11:]
     new_index = 0
-    fname_mapping_tr, new_index = map_images(datasets, "imagesTr", new_index)
-    fname_mapping_ts, new_index = map_images(datasets, "imagesTs", new_index)
+    fname_mapping_tr, new_index = map_images(
+        datasets, "imagesTr", new_index, acronym=dataset_acronym
+    )
+    fname_mapping_ts, new_index = map_images(
+        datasets, "imagesTs", new_index, acronym=dataset_acronym
+    )
     fname_mapping = {
         "images_tr": fname_mapping_tr,
         "images_ts": fname_mapping_ts,
