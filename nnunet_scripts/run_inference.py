@@ -42,9 +42,6 @@ def get_parser() -> argparse.ArgumentParser:
                         help='List of folds to use for inference. If not specified, all available folds. Default: None')
     parser.add_argument('--use-gpu', action='store_true', default=False,
                         help='Use GPU for inference. Default: False')
-    parser.add_argument('--use-mirroring', action='store_true', default=False,
-                        help='Use mirroring (test-time) augmentation for prediction. '
-                        'NOTE: Inference takes a long time when this is enabled. Default: False')
     parser.add_argument('--use-best-checkpoint', action='store_true', default=False,
                         help='Use the best checkpoint (instead of the final checkpoint) for prediction. '
                         'NOTE: nnUNet by default uses the final checkpoint. Default: False')
@@ -149,7 +146,7 @@ def main():
         tile_step_size=0.5,
         use_gaussian=True,
         use_mirroring=True,
-        perform_everything_on_gpu=True if args.use_gpu else False,
+        perform_everything_on_gpu=args.use_gpu,
         device=torch.device('cuda') if args.use_gpu else torch.device('cpu'),
         verbose=False,
         verbose_preprocessing=False,
