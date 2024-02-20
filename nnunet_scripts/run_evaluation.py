@@ -7,13 +7,16 @@ Author: Armand Collin
 
 import argparse
 import json
+import os
 import warnings
+from pathlib import Path
+
 import cv2
 import numpy as np
-import torch
 import pandas as pd
-from pathlib import Path
+import torch
 from monai.metrics import DiceMetric, MeanIoU
+
 
 def compute_metrics(pred, gt, metric):
     """
@@ -109,6 +112,8 @@ def main():
 
     # Export the DataFrame to a CSV file
     output_fname = args.output_fname + '.csv'
+    output_dir = Path(output_fname).parent
+    os.makedirs(output_dir, exist_ok=True)
     df.to_csv(output_fname, index=False)
     print(f'Evaluation results saved to {output_fname}.')
 
