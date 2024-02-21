@@ -6,3 +6,4 @@ dependencies:
       - opencv-python==4.8.1.78
       - nnunetv2==2.2.1
       - monai
+      - statsmodels==0.14.1
