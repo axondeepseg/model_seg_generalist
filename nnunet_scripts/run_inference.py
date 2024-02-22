@@ -4,13 +4,13 @@ This script runs inference on a whole dataset or on individual images using nnUN
 Author: Naga Karthik
 """
 
-import os
 import argparse
-import torch
-from pathlib import Path
-from batchgenerators.utilities.file_and_folder_operations import join
+import os
 import time
+from pathlib import Path
 
+import torch
+from batchgenerators.utilities.file_and_folder_operations import join
 from nnunetv2.inference.predict_from_raw_data import nnUNetPredictor
 
 if 'nnUNet_raw' not in os.environ:
@@ -38,11 +38,10 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument('--path-model', required=True, 
                         help='Path to the model directory. This folder should contain individual folders '
                         'like fold_0, fold_1, etc.',)
+    parser.add_argument('--folds', nargs='+', type=int, default=None,
+                        help='List of folds to use for inference. If not specified, all available folds. Default: None')
     parser.add_argument('--use-gpu', action='store_true', default=False,
                         help='Use GPU for inference. Default: False')
-    parser.add_argument('--use-mirroring', action='store_true', default=False,
-                        help='Use mirroring (test-time) augmentation for prediction. '
-                        'NOTE: Inference takes a long time when this is enabled. Default: False')
     parser.add_argument('--use-best-checkpoint', action='store_true', default=False,
                         help='Use the best checkpoint (instead of the final checkpoint) for prediction. '
                         'NOTE: nnUNet by default uses the final checkpoint. Default: False')
@@ -136,7 +135,10 @@ def main():
             path_pred = os.path.join(args.path_out, add_suffix(fname, '_pred')) 
             path_out.append(path_pred)
 
-    folds_avail = [int(f.split('_')[-1]) for f in os.listdir(args.path_model) if f.startswith('fold_')]
+    if args.folds is not None:
+        folds_avail = args.folds
+    else:
+        folds_avail = [int(f.split('_')[-1]) for f in os.listdir(args.path_model) if f.startswith('fold_')]
 
     print('Starting inference...')
     start = time.time()
@@ -144,7 +146,7 @@ def main():
         tile_step_size=0.5,
         use_gaussian=True,
         use_mirroring=True,
-        perform_everything_on_gpu=True if args.use_gpu else False,
+        perform_everything_on_gpu=args.use_gpu,
         device=torch.device('cuda') if args.use_gpu else torch.device('cpu'),
         verbose=False,
         verbose_preprocessing=False,
