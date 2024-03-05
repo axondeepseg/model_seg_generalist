@@ -1,2 +1,2 @@
 # remove jupyter notebook from languages section
-.ipynb linguist-documentation
+./notebooks/*.ipynb linguist-documentation
