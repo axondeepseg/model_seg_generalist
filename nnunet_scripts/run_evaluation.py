@@ -52,15 +52,17 @@ def get_original_filename(gt, reverted_mapping):
 
 def print_metric(value, gt, metric, label, reverted_mapping):
     # modify gt name to add _0000 suffix before file extension
-    gt_name = gt.name.split('.')[0] + '_0000.' + gt.name.split('.')[1]
-    original_fname = get_original_filename(gt, reverted_mapping)
+    if reverted_mapping:
+        original_fname = get_original_filename(gt, reverted_mapping)
+    else:
+        original_fname = None
     metric_name = metric.__class__.__name__
     print(f'{metric_name} for {label} in {gt.name} (aka {original_fname}): {value}')
 
 def main():
     parser = argparse.ArgumentParser(description='Run evaluation on a generalist model')
     parser.add_argument('-p', '--pred_path', type=str, help='Path to the predictions folder (axonmyelin preds)')
-    parser.add_argument('-m', '--mapping_path', type=str, help='Path to the filename mapping JSON file')
+    parser.add_argument('-m', '--mapping_path', type=str, default=None, help='Path to the filename mapping JSON file')
     parser.add_argument('-g', '--gt_path', type=str, help='Path to the GT folder (axonmyelin masks)')
     parser.add_argument('-o', '--output_fname', type=str, help='Filename for evaluation results')
     parser.add_argument('-s', '--pred_suffix', type=str, default="", help='Suffix in the prediction files (e.g. _0000)')
@@ -68,8 +70,14 @@ def main():
 
     pred_path = Path(args.pred_path)
     gt_path = Path(args.gt_path)
-    mapping = json.load(open(args.mapping_path))
-    reverted_mapping = {v: k for k, v in mapping['images_ts'].items()}
+    
+    # Load the filename mapping
+    if args.mapping_path:
+        mapping = json.load(open(args.mapping_path))
+        reverted_mapping = {v: k for k, v in mapping['images_ts'].items()}
+    else:
+        reverted_mapping = None
+        
     # there might be more test imgs than GTs; evaluation on labelled data only
     gts = [f for f in gt_path.glob('*.png')]
 
@@ -100,7 +108,7 @@ def main():
         # compute the metrics
         for label, pred_mask, gt_mask in classwise_pairs:
             row = {
-                'original_fname': get_original_filename(gt, reverted_mapping), 
+                'original_fname': get_original_filename(gt, reverted_mapping) if reverted_mapping else pred.name, 
                 'pred_fname': pred.name, 
                 'label': label
             }
