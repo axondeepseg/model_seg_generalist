@@ -81,13 +81,19 @@ Note: `<FORMATTED_DATASET_ID>` should be a three-digit number where 1 would beco
 To replicate the inference experiments, execute the following script:
 
 ```bash
-source ./nnunet_scripts/inference_and_evaluation.sh ${RESULTS_DIR}/nnUNet_results <DATASET_1> <DATASET_2> <DATASET_3> ... <DATASET_N>
+source ./nnunet_scripts/inference_and_evaluation.sh ${NNUNET_DIR} <DATASET_1> <DATASET_2> <DATASET_3> ... <DATASET_N>
 ```
 
 For instance, to run the script with specific datasets, use the command below:
 
 ```bash
-source ./nnunet_scripts/inference_and_evaluation.sh ${RESULTS_DIR}/nnUNet_results Dataset002_SEM Dataset003_TEM Dataset004_BF_RAT Dataset005_wakehealth Dataset006_BF_VCU Dataset444_AGG
+source ./nnunet_scripts/inference_and_evaluation.sh ${NNUNET_DIR} Dataset002_SEM Dataset003_TEM Dataset004_BF_RAT Dataset005_wakehealth Dataset006_BF_VCU Dataset444_AGG
+```
+In addition to the individual inference and evaluation scripts, there is an "ensemble_inference_and_evaluation.sh" script available. This script performs ensemble inferences using all the models listed and then evaluates the ensemble model. The arguments for this script are similar to the ones mentioned above, except `<DATASET_K>` represents all the models being ensembled.
+
+To use the ensemble script, execute the following command:
+```bash
+source ./nnunet_scripts/ensemble_inference_and_evaluation.sh ${NNUNET_DIR} <DATASET_1> <DATASET_2> <DATASET_3> ... <DATASET_N>
 ```
 
 
