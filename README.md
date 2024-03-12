@@ -90,7 +90,58 @@ For instance, to run the script with specific datasets, use the command below:
 source ./nnunet_scripts/inference_and_evaluation.sh ${RESULTS_DIR}/nnUNet_results Dataset002_SEM Dataset003_TEM Dataset004_BF_RAT Dataset005_wakehealth Dataset006_BF_VCU Dataset444_AGG
 ```
 
+To replicate out of distribution experiments (OOD), you can use the following script:
 
+```bash
+source ./nnunet_scripts/ood_results.sh <PATH_TO_OOD_DATASET> ${RESULTS_DIR}/nnUNet_results <DATASET_1> <DATASET_2> <DATASET_3> ... <DATASET_N>
+```
+
+Ensure the OOD dataset adheres to the following structure prior to executing the script:
+
+```
+├── <MODALITY 1>
+│   ├── some species
+│       ├── image_0000.png
+│       └── (optional) labels
+│            └── image.png
+|   ...
+│   └── another species
+│       ├── image_0000.png
+│       └── (optional) labels
+│            └── image.png
+└── <MODALITY N>
+    ...
+```
+
+For instance:
+
+```   
+├── BF
+│   └── cat
+│       └── CAT_0000.png
+├── SEM
+│   ├── dog
+│   │   └── DOG_0000.png
+│   └── human
+│       ├── AGG_203_0000.png
+│       └── labels
+│            └── AGG_203.png
+└── TEM
+    └── macaque
+        ├── labels
+              ├── MACAQUE_000_0000.png
+              ├── MACAQUE_001_0000.png
+              ├── MACAQUE_002_0000.png
+              ├── MACAQUE_003_0000.png
+              ├── MACAQUE_004_0000.png
+             ...
+        ├── MACAQUE_000_0000.png
+        ├── MACAQUE_001_0000.png
+        ├── MACAQUE_002_0000.png
+        ├── MACAQUE_003_0000.png
+        ├── MACAQUE_004_0000.png
+       ...
+```
 ## Authors
 
 - Armand Collin
