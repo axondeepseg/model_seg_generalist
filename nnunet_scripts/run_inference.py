@@ -45,6 +45,10 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument('--use-best-checkpoint', action='store_true', default=False,
                         help='Use the best checkpoint (instead of the final checkpoint) for prediction. '
                         'NOTE: nnUNet by default uses the final checkpoint. Default: False')
+    parser.add_argument('--fold_all', action='store_true', default=False,
+                        help='Run inference with fold_all as opposed to ensembling the folds. Default: False')
+    parser.add_argument('--save-probabilities', action='store_true', default=False,
+                        help='Save the probabilities of the predictions. Default: False')
 
     return parser
 
@@ -137,8 +141,10 @@ def main():
 
     if args.folds is not None:
         folds_avail = args.folds
+    elif args.fold_all:
+        folds_avail = ['all']
     else:
-        folds_avail = [int(f.split('_')[-1]) for f in os.listdir(args.path_model) if f.startswith('fold_')]
+        folds_avail = [int(f.split('_')[-1]) for f in os.listdir(args.path_model) if f.startswith('fold_') and f != 'fold_all']
 
     print('Starting inference...')
     start = time.time()
@@ -164,7 +170,7 @@ def main():
     predictor.predict_from_files(
         path_data_tmp, 
         path_out,
-        save_probabilities=False, 
+        save_probabilities=args.save_probabilities, 
         overwrite=False,
         num_processes_preprocessing=2, 
         num_processes_segmentation_export=2,
