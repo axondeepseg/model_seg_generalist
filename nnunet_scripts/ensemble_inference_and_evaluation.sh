@@ -1,4 +1,4 @@
-# The first argument should be the path to the datasets.
+# The first argument should be the path to the nnunet folder.
 # The remaining arguments should be the names of the datasets to process.
 NNUNET_PATH=$1
 DATASET_NAME="Dataset444_AGG"
