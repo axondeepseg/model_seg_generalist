@@ -8,7 +8,6 @@ fi
 
 RESULTS_DIR=$(realpath $1)
 dataset_id=${2:-444}
-dataset_name=${3:-"AGG"}
 
 echo "-------------------------------------------------------"
 echo "Converting dataset to nnUNetv2 format"
